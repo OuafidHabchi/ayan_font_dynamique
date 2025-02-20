@@ -37,13 +37,13 @@ const EstimationModal = ({ language, isOpen, onClose }: { language: string; isOp
     // Gérer les champs texte
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((prev: any) => ({ ...prev, [name]: value }));
     };
 
     // Gérer les listes déroulantes
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((prev: any) => ({ ...prev, [name]: value }));
     };
 
     // Gérer les images uploadées
