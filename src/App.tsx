@@ -1,43 +1,51 @@
-import { useState } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import ServicesMecanique from "./pages/ServicesMecanique";
-import ServicesCarrosserie from "./pages/ServicesCarrosserie";
-import Login from "./pages/Login";
-import Home from "./pages/Home"; // <- Import de la page d'accueil
-import ContactUs from "./pages/ContactUs";
+import  { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import DSPDetail from './pages/DSPDetail';
+import Navbar from './components/Navbar';
+import DSPMessages from './pages/DSPMessages';
+import Login from './pages/Login';
 
-export default function App() {
-  const [language, setLanguage] = useState("fr");
-  const location = useLocation();
+const App = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  return (
-    <>
-      {/* Afficher la Navbar sauf sur la page de Login */}
-      {location.pathname !== "/login" && (
-        <Navbar language={language} setLanguage={setLanguage} />
-      )}
+    // Vérification de la connexion au démarrage de l'application
+    useEffect(() => {
+        const savedUsername = localStorage.getItem('username');
+        const savedPassword = localStorage.getItem('password');
+        if (savedUsername && savedPassword) {
+            setIsAuthenticated(true);
+        }
+    }, []);
 
-      <Routes>
-        <Route
-          path="/"
-          element={<Home language={language}/>} // <- Page d'accueil avec le slider
-        />
-        <Route
-          path="/services-mecanique"
-          element={<ServicesMecanique language={language} />}
-        />
-        <Route
-          path="/services-carrosserie"
-          element={<ServicesCarrosserie language={language} />}
-        />
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-        <Route path="/contact-us" element={<ContactUs language={language} />} />
+    const handleLogin = () => {
+        setIsAuthenticated(true);
+    };
 
-      </Routes>
-    </>
-  );
-}
+    const handleLogout = () => {
+        localStorage.removeItem('username');
+        localStorage.removeItem('password');
+        setIsAuthenticated(false); // Mettre à jour l'état pour rediriger vers /login
+    };
+
+    return (
+        <>
+            {isAuthenticated && <Navbar onLogout={handleLogout} />} {/* Passer handleLogout à Navbar */}
+
+            <Routes>
+                {!isAuthenticated ? (
+                    <Route path="*" element={<Login onLogin={handleLogin} />} />
+                ) : (
+                    <>
+                        <Route path="/home" element={<Home />} />
+                        <Route path="/dsp" element={<DSPDetail />} />
+                        <Route path="/DSPMessages" element={<DSPMessages />} />
+                    </>
+                )}
+            </Routes>
+        </>
+    );
+};
+
+
+export default App;
