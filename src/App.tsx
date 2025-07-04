@@ -1,51 +1,140 @@
-import  { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import DSPDetail from './pages/DSPDetail';
+import { useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import DSPMessages from './pages/DSPMessages';
-import Login from './pages/Login';
+import AuthenticatedLayout from './components/AuthenticatedLayout';
+import HomePage from './pages/Public/HomePage';
+import SignUp from './pages/Public/SignUp';
+import SignIn from './pages/Public/SignIn';
+import AboutUs from './pages/Public/AboutUs';
+import Ebook from './pages/Public/Ebook';
+import Dashboard from './pages/Connected/Dashboard';
+import LearnHub from './pages/Public/LearnHub';
+import AIStudio from './pages/Public/AIStudio';
+import Invest from './pages/Public/Invest';
+import MyEbook from './pages/Connected/MyEbook';
+import MyLearnHub from './pages/Connected/MyLearnHub';
+import MyInvest from './pages/Connected/MyInvest';
+import Mycreations from './pages/Connected/Mycreations';
+import Profil from './pages/Connected/Profil';
 
-const App = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+type Language = 'fr' | 'en' | 'ar';
 
-    // Vérification de la connexion au démarrage de l'application
-    useEffect(() => {
-        const savedUsername = localStorage.getItem('username');
-        const savedPassword = localStorage.getItem('password');
-        if (savedUsername && savedPassword) {
-            setIsAuthenticated(true);
-        }
-    }, []);
+export default function App() {
+  const [language, setLanguage] = useState<Language>('fr');
+  const isAuthenticated = !!localStorage.getItem('token');
 
-    const handleLogin = () => {
-        setIsAuthenticated(true);
-    };
+  return (
+    <>
+      {/* Navbar affichée seulement si non authentifié */}
+      {!isAuthenticated && <Navbar language={language} setLanguage={setLanguage} />}
 
-    const handleLogout = () => {
-        localStorage.removeItem('username');
-        localStorage.removeItem('password');
-        setIsAuthenticated(false); // Mettre à jour l'état pour rediriger vers /login
-    };
+      <Routes>
+        {!isAuthenticated ? (
+          <>
+            {/* Public routes */}
+            <Route path="/" element={<HomePage language={language} />} />
+            <Route path="/signup" element={<SignUp language={language} />} />
+            <Route path="/signin" element={<SignIn language={language} />} />
+            <Route path="/aboutus" element={<AboutUs language={language} />} />
+            <Route path="/ebook" element={<Ebook language={language} />} />
+            <Route path="/LearnHub" element={<LearnHub />} />
+            <Route path="/AIStudio" element={<AIStudio />} />
+            <Route path="/Invest" element={<Invest />} />
 
-    return (
-        <>
-            {isAuthenticated && <Navbar onLogout={handleLogout} />} {/* Passer handleLogout à Navbar */}
+            {/* Si une route non trouvée ➔ redirect vers / */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </>
+        ) : (
+          <>
+            {/* Authenticated routes */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route
+              path="/dashboard"
+              element={
+                <AuthenticatedLayout>
+                  <Dashboard />
+                </AuthenticatedLayout>
+              }
+            />
 
-            <Routes>
-                {!isAuthenticated ? (
-                    <Route path="*" element={<Login onLogin={handleLogin} />} />
-                ) : (
-                    <>
-                        <Route path="/home" element={<Home />} />
-                        <Route path="/dsp" element={<DSPDetail />} />
-                        <Route path="/DSPMessages" element={<DSPMessages />} />
-                    </>
-                )}
-            </Routes>
-        </>
-    );
-};
+            <Route
+              path="/ebooks"
+              element={
+                <AuthenticatedLayout>
+                  <Ebook language={language} />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/LearnHubs"
+              element={
+                <AuthenticatedLayout>
+                  <LearnHub />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/AIStudios"
+              element={
+                <AuthenticatedLayout>
+                  <AIStudio />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/Invests"
+              element={
+                <AuthenticatedLayout>
+                  <Invest />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/MyEbooks"
+              element={
+                <AuthenticatedLayout>
+                  <MyEbook />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/MyFormations"
+              element={
+                <AuthenticatedLayout>
+                  <MyLearnHub />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/MyInvestissements"
+              element={
+                <AuthenticatedLayout>
+                  <MyInvest />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/MyCreations"
+              element={
+                <AuthenticatedLayout>
+                  <Mycreations />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <AuthenticatedLayout>
+                  <Profil />
+                </AuthenticatedLayout>
+              }
+            />
 
-
-export default App;
+            {/* Si une route non trouvée ➔ redirect vers /dashboard */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </>
+        )}
+      </Routes>
+    </>
+  );
+}

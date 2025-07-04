@@ -1,88 +1,125 @@
-import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { HiMenuAlt3, HiX } from 'react-icons/hi';
+import { FaHome, FaInfoCircle, FaSignInAlt, FaGlobe } from 'react-icons/fa';
+
+type Language = 'fr' | 'en' | 'ar';
 
 interface NavbarProps {
-  onLogout: () => void;
+  language: Language;
+  setLanguage: React.Dispatch<React.SetStateAction<Language>>;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
-  const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+const Navbar: React.FC<NavbarProps> = ({ language, setLanguage }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    const confirmLogout = window.confirm("Êtes-vous sûr de vouloir vous déconnecter ?");
-    
-    if (confirmLogout) {
-      localStorage.removeItem("username");
-      localStorage.removeItem("password");
-      onLogout();
-      navigate("/login");
-    }
+  const isHomePage = location.pathname === '/';
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    setMenuOpen(false);
   };
 
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setLanguage(e.target.value as Language);
+    setMenuOpen(false);
+  };
+
+  const texts = {
+    home: { fr: 'Accueil', en: 'Home', ar: 'الرئيسية' },
+    about: { fr: 'À propos', en: 'About Us', ar: 'معلومات عنا' },
+    login: { fr: 'Connexion', en: 'Login', ar: 'تسجيل الدخول' },
+    signup: { fr: 'Créer un compte', en: 'Sign Up', ar: 'إنشاء حساب' },
+  };
+
+  const menuItems = [
+    { path: '/', icon: <FaHome />, label: texts.home[language] },
+    { path: '/aboutus', icon: <FaInfoCircle />, label: texts.about[language] },
+    { path: '/signin', icon: <FaSignInAlt />, label: texts.login[language] },
+  ];
+
   return (
-    <nav className="bg-gradient-to-r from-blue-900 to-gray-800 text-white p-4 fixed w-full top-0 shadow-lg z-50">
-      <div className="container mx-auto flex justify-between items-center">
-        {/* Logo */}
-        <div className="text-2xl font-bold tracking-widest text-cyan-400">
-          Opex Logistix Manager
+    <header className={`${isHomePage ? 'bg-transparent' : 'bg-blue-950'} text-white fixed top-0 w-full z-50 shadow-md`}>
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+
+        {/* Left: Logo + Title */}
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNavigate('/')}>
+          <img src="/ayan3.png" alt="Logo" className="h-12 w-20 rounded-full shadow-md border-2 border-orange-400" />
+          
         </div>
 
-        {/* Bouton Hamburger pour mobile */}
-        <button 
-          className="md:hidden focus:outline-none"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <svg 
-            className="w-6 h-6" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {isOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-
-        {/* Menu de Navigation */}
-        <ul className={`md:flex md:space-x-8 md:items-center absolute md:static left-0 md:left-auto top-16 right-0 bg-gray-800 md:bg-transparent w-full md:w-auto ${isOpen ? "block" : "hidden"} space-y-4 md:space-y-0 p-4 md:p-0`}>
-          <li>
-            <Link 
-              to="/home" 
-              className={`block md:inline hover:text-cyan-300 transition duration-300 ${location.pathname === "/" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-gray-300"}`} 
-              onClick={() => setIsOpen(false)}
+        {/* Desktop Menu */}
+        <div className="hidden md:flex items-center gap-6 text-orange-400 ">
+          {menuItems.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => handleNavigate(item.path)}
+              className={`text-sm font-bold flex items-center gap-1 border-b-2 ${
+                location.pathname === item.path
+                  ? 'border-border-orange-400 font-bold'
+                  : 'border-transparent hover:border-white'
+              }`}
             >
-              Home
-            </Link>
-          </li>
-
-          <li>
-            <Link 
-              to="/DSPMessages" 
-              className={`block md:inline hover:text-cyan-300 transition duration-300 ${location.pathname === "/DSPMessages" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-gray-300"}`} 
-              onClick={() => setIsOpen(false)}
-            >
-              DSP Messages
-            </Link>
-          </li>
-
-          {/* Bouton Logout */}
-          <li>
-            <button 
-              onClick={handleLogout} 
-              className="block md:inline text-gray-300 hover:text-cyan-300 transition duration-300"
-            >
-              Log Out
+              {item.icon} {item.label}
             </button>
-          </li>
-        </ul>
+          ))}
+
+          <div className="relative">
+            <FaGlobe className="absolute left-2 top-2.5 text-blue-950" />
+            <select
+              value={language}
+              onChange={handleLanguageChange}
+              className="bg-orange-400 text-blue-950 text-sm pl-8 pr-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-white"
+            >
+              <option value="fr">FR</option>
+              <option value="en">EN</option>
+              <option value="ar">AR</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <button onClick={() => setMenuOpen(!menuOpen)} className="focus:outline-none text-orange-400">
+            {menuOpen ? <HiX size={28} /> : <HiMenuAlt3 size={28} />}
+          </button>
+        </div>
       </div>
-    </nav>
+
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="md:hidden bg-blue-950 px-6 py-4 space-y-4 animate-slideDown text-white">
+          {menuItems.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => handleNavigate(item.path)}
+              className={`w-full text-left flex items-center gap-2 text-sm font-medium ${
+                location.pathname === item.path
+                  ? 'bg-blue-900 rounded px-3 py-2'
+                  : 'hover:underline'
+              }`}
+            >
+              {item.icon} {item.label}
+            </button>
+          ))}
+
+          <div className="relative">
+            <FaGlobe className="absolute left-3 top-3 text-blue-950" />
+            <select
+              value={language}
+              onChange={handleLanguageChange}
+              className="bg-white text-blue-950 text-sm pl-10 pr-3 py-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
+            >
+              <option value="fr">FR</option>
+              <option value="en">EN</option>
+              <option value="ar">AR</option>
+            </select>
+          </div>
+        </div>
+      )}
+    </header>
   );
 };
 

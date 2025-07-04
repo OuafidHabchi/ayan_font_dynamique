@@ -6,15 +6,17 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
   ],
+  server: {
+    host: '0.0.0.0', // Permet l'accès via IP locale
+    port: 5173, // facultatif, assure que le port est fixé si tu le souhaites
+  },
   build: {
-    // Définit le répertoire de sortie pour le build
-    outDir: 'dist', // Ce répertoire contiendra tous vos fichiers statiques générés
-    assetsDir: 'assets', // Spécifie où les ressources comme les images et les fichiers CSS/JS seront placées
+    outDir: 'dist',
+    assetsDir: 'assets',
     rollupOptions: {
-      input: './index.html', // Vous pouvez spécifier un fichier d'entrée si nécessaire
+      input: './index.html',
     },
-    // Options supplémentaires pour améliorer l'expérience de build
-    minify: 'esbuild', // Optimisation pour minimiser les fichiers
-    sourcemap: true, // Générer des sourcemaps si nécessaire (utile pour le débogage)
+    minify: 'esbuild',
+    sourcemap: true,
   }
 })
