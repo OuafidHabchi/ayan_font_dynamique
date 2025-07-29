@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+
 interface User {
   id: string;
   nom: string;
   prenom: string;
   email: string;
+  phone: string;
   role: string;
   langue: string;
+  promoCode?:string;
 }
 
 interface AuthContextProps {

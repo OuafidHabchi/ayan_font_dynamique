@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
+import AppURL from '../../components/AppUrl';
 
 type Language = 'fr' | 'en' | 'ar';
 
@@ -43,7 +44,7 @@ const SignUp: React.FC<SignUpProps> = ({ language }) => {
 
     // 🔥 Envoyer les données au backend
     try {
-      const response = await axios.post('http://localhost:3000/api/users/createaccount', {
+      const response = await axios.post(`${AppURL}/api/users/createaccount`, {
         nom: lastName,
         prenom: firstName,
         email,

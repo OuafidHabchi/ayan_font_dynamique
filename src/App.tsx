@@ -16,6 +16,20 @@ import MyLearnHub from './pages/Connected/MyLearnHub';
 import MyInvest from './pages/Connected/MyInvest';
 import Mycreations from './pages/Connected/Mycreations';
 import Profil from './pages/Connected/Profil';
+import StudioEbook from './pages/Connected/StudioEbook';
+import StudioFormation from './pages/Connected/StudioFormation';
+import EbooksTemplate from './pages/Admin/EbooksTemplate';
+import AdminApprovalPanel from './pages/Admin/AdminApprovalPanel';
+import Affiliation from './pages/Connected/Affiliation';
+import Sponsoring from './pages/Connected/Sponsoring';
+import Licence from './pages/Connected/Licence';
+import AffiliateBookView from './pages/Public/AffiliateBookView';
+import AffiliateFormationView from './pages/Public/AffiliateFormationView';
+import AllUsers from './pages/Admin/AllUsers';
+import { ProgrammeEtudes } from './pages/Admin/ProgrammeEtudes';
+import ManagementSponsoring from './pages/Admin/ManagementSponsoring';
+
+
 
 type Language = 'fr' | 'en' | 'ar';
 
@@ -37,9 +51,12 @@ export default function App() {
             <Route path="/signin" element={<SignIn language={language} />} />
             <Route path="/aboutus" element={<AboutUs language={language} />} />
             <Route path="/ebook" element={<Ebook language={language} />} />
-            <Route path="/LearnHub" element={<LearnHub />} />
-            <Route path="/AIStudio" element={<AIStudio />} />
+            <Route path="/LearnHub" element={<LearnHub language={language} />} />
+            <Route path="/AIStudio" element={<AIStudio language={language} />} />
             <Route path="/Invest" element={<Invest />} />
+            <Route path="/affiliateBookView/:bookId" element={<AffiliateBookView language={language} />} />
+            <Route path="/affiliateFormationView/:formationId" element={<AffiliateFormationView language={language} />} />
+
 
             {/* Si une route non trouvée ➔ redirect vers / */}
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -48,6 +65,52 @@ export default function App() {
           <>
             {/* Authenticated routes */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+             <Route
+              path="/managementSponsoring"
+              element={
+                <AuthenticatedLayout>
+                  <ManagementSponsoring />
+                </AuthenticatedLayout>
+              }
+            />
+            
+
+            <Route
+              path="/allUsers"
+              element={
+                <AuthenticatedLayout>
+                  <AllUsers />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/programmeEtudes"
+              element={
+                <AuthenticatedLayout>
+                  <ProgrammeEtudes />
+                </AuthenticatedLayout>
+              }
+            />
+
+            <Route
+              path="/affiliateBookView/:bookId"
+              element={
+                <AuthenticatedLayout>
+                  <AffiliateBookView language={language} />
+                </AuthenticatedLayout>
+              }
+            />
+
+            <Route
+              path="/affiliateFormationView/:formationId"
+              element={
+                <AuthenticatedLayout>
+                  <AffiliateFormationView language={language} />
+                </AuthenticatedLayout>
+              }
+            />
+
             <Route
               path="/dashboard"
               element={
@@ -69,7 +132,7 @@ export default function App() {
               path="/LearnHubs"
               element={
                 <AuthenticatedLayout>
-                  <LearnHub />
+                  <LearnHub language={language} />
                 </AuthenticatedLayout>
               }
             />
@@ -77,7 +140,7 @@ export default function App() {
               path="/AIStudios"
               element={
                 <AuthenticatedLayout>
-                  <AIStudio />
+                  <AIStudio language={language} />
                 </AuthenticatedLayout>
               }
             />
@@ -113,6 +176,7 @@ export default function App() {
                 </AuthenticatedLayout>
               }
             />
+
             <Route
               path="/MyCreations"
               element={
@@ -121,11 +185,77 @@ export default function App() {
                 </AuthenticatedLayout>
               }
             />
+
+            <Route
+              path="/EbooksTemplate"
+              element={
+                <AuthenticatedLayout>
+                  <EbooksTemplate />
+                </AuthenticatedLayout>
+              }
+            />
+
+            <Route
+              path="/ApprovalPanel"
+              element={
+                <AuthenticatedLayout>
+                  <AdminApprovalPanel />
+                </AuthenticatedLayout>
+              }
+            />
+
+
             <Route
               path="/profile"
               element={
                 <AuthenticatedLayout>
                   <Profil />
+                </AuthenticatedLayout>
+              }
+            />
+
+            <Route
+              path="/affiliation"
+              element={
+                <AuthenticatedLayout>
+                  <Affiliation />
+                </AuthenticatedLayout>
+              }
+            />
+            <Route
+              path="/sponsoring"
+              element={
+                <AuthenticatedLayout>
+                  <Sponsoring />
+                </AuthenticatedLayout>
+              }
+            />
+            
+            <Route
+              path="/licence"
+              element={
+                <AuthenticatedLayout>
+                  <Licence />
+                </AuthenticatedLayout>
+              }
+            />
+
+
+
+            <Route
+              path="/StudioFormation"
+              element={
+                <AuthenticatedLayout>
+                  <StudioFormation />
+                </AuthenticatedLayout>
+              }
+            />
+
+            <Route
+              path="/StudioEbook"
+              element={
+                <AuthenticatedLayout>
+                  <StudioEbook />
                 </AuthenticatedLayout>
               }
             />

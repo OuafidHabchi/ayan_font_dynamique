@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-// import axios from 'axios';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext'; // adapte ton chemin
+import AppURL from '../../components/AppUrl';
 
 
 type Language = 'fr' | 'en' | 'ar';
@@ -18,71 +19,93 @@ const SignIn: React.FC<SignInProps> = ({ language }) => {
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(`${AppURL}/api/users/login`, {
+        email,
+        password,
+      });
+
+      console.log("✅ Connexion réussie :", response.data);
+
+      const { token, user } = response.data;
+
+      // ➡️ Sauvegarder user + token via context
+      login(user, token);
+
+      // ⚠️ Sauvegarder le password en clair est dangereux. Si nécessaire :
+      localStorage.setItem('password', password);
+      // ➡️ Vérifie s'il y a un redirect sauvegardé
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+
+      if (redirectPath) {
+        localStorage.removeItem('redirectAfterLogin'); // nettoie
+        window.location.href = redirectPath;
+        return; // stop ici
+      }
+
+
+
+      // ⚠️ Sauvegarder le password en clair est dangereux. Si nécessaire :
+      localStorage.setItem('password', password);
+
+      // ➡️ Rediriger vers dashboard
+      window.location.href = '/dashboard';
+
+    } catch (err: any) {
+      console.error(err);
+      alert(language === 'fr' ? "Email ou mot de passe incorrect" : language === 'en' ? "Incorrect email or password" : "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+    }
+  };
+
   // const handleSignIn = async (e: React.FormEvent) => {
   //   e.preventDefault();
 
-  //   try {
-  //     const response = await axios.post("http://192.168.2.14:3000/api/users/login", {
-  //       email,
-  //       password,
-  //     });
+  //   // ✅ Test local sans requête backend
+  //   if (email === "123@gmail.com" && password === "123") {
+  //     console.log("✅ Connexion test réussie");
 
-  //     console.log("✅ Connexion réussie :", response.data);
-
-  //     const { token, user } = response.data;
+  //     // ➡️ Créer un fake user et token pour le contexte
+  //     const user = {
+  //       id: "test123",
+  //       name: "Test User",
+  //       email: "123@gmail.com",
+  //       nom: "User",
+  //       prenom: "Test",
+  //       role: "user",
+  //       langue: "language"
+  //     };
+  //     const token = "fake-token-123";
 
   //     // ➡️ Sauvegarder user + token via context
   //     login(user, token);
 
   //     // ⚠️ Sauvegarder le password en clair est dangereux. Si nécessaire :
   //     localStorage.setItem('password', password);
+  //     // ➡️ Vérifie s'il y a un redirect sauvegardé
+  //     const redirectPath = localStorage.getItem('redirectAfterLogin');
+
+  //     if (redirectPath) {
+  //       localStorage.removeItem('redirectAfterLogin'); // nettoie
+  //       window.location.href = redirectPath;
+  //       return; // stop ici
+  //     }
+
 
   //     // ➡️ Rediriger vers dashboard
   //     window.location.href = '/dashboard';
 
-  //   } catch (err: any) {
-  //     console.error(err);
-  //     alert(language === 'fr' ? "Email ou mot de passe incorrect" : language === 'en' ? "Incorrect email or password" : "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+  //   } else {
+  //     alert(language === 'fr'
+  //       ? "Email ou mot de passe incorrect"
+  //       : language === 'en'
+  //         ? "Incorrect email or password"
+  //         : "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+  //     );
   //   }
   // };
-
-  const handleSignIn = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  // ✅ Test local sans requête backend
-  if (email === "123@gmail.com" && password === "123") {
-    console.log("✅ Connexion test réussie");
-
-    // ➡️ Créer un fake user et token pour le contexte
-    const user = {
-      id: "test123",
-      name: "Test User",
-      email: "123@gmail.com",
-      nom: "User",
-      prenom: "Test",
-      role: "user",
-      langue: "language"
-    };
-    const token = "fake-token-123";
-
-    // ➡️ Sauvegarder user + token via context
-    login(user, token);
-
-    // ⚠️ Sauvegarder le password en clair est dangereux. Si nécessaire :
-    localStorage.setItem('password', password);
-
-    // ➡️ Rediriger vers dashboard
-    window.location.href = '/dashboard';
-
-  } else {
-    alert(language === 'fr'
-      ? "Email ou mot de passe incorrect"
-      : language === 'en'
-      ? "Incorrect email or password"
-      : "البريد الإلكتروني أو كلمة المرور غير صحيحة"
-    );
-  }
-};
 
 
   const titles = {

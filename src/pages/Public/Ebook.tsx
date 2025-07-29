@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { fakeBooks, Book } from '../../components/fakeBooks';
+import React, { useEffect, useState } from 'react';
+// import { fakeBooks, Book } from '../../components/fakeBooks';
 import BookModal from '../../components/BookModal';
 import NouveauxLivresSection from '../../components/NouveauxLivresSection';
+import axios from 'axios';
+import AppURL from '../../components/AppUrl';
 
 type Language = 'fr' | 'en' | 'ar';
 
@@ -9,26 +11,73 @@ interface EbookProps {
   language: Language;
 }
 
+interface Book {
+  _id: string;
+  auteur: {
+    avatar: any;
+    nom: string;
+    prenom: string;
+  }; // ✅ plus un ID, mais un objet avec nom, prénom & avatar
+  titre: string;
+  categorie: string;
+  prix: number;
+  description: string;
+  NumPages: number;
+  langue: string;
+  approved: string;
+  ebookId: string;
+  folderPath: string;
+  promotion: boolean;
+  newPrix: number;
+  createdAt: string;
+  investmentOptions: {
+    affiliation: Boolean,
+    codePromo: Boolean,
+    licence: Boolean,
+    sponsoring: Boolean,
+    licenceMontant: Number
+  }
+}
+
+
+
 const Ebook: React.FC<EbookProps> = ({ language }) => {
+  const [realBooks, setRealBooks] = useState<Book[]>([]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Récupérer toutes les catégories uniques
-  const categories = Array.from(new Set(fakeBooks.map(book => book.categorie)));
+  const categories: string[] = Array.from(new Set(realBooks.map((book: { categorie: any; }) => book.categorie)));
 
   const titles: Record<Language, string> = {
-  fr: "Explorez nos eBooks",
-  en: "Explore our eBooks",
-  ar: "استكشف كتبنا الإلكترونية",
-};
+    fr: "Explorez nos eBooks",
+    en: "Explore our eBooks",
+    ar: "استكشف كتبنا الإلكترونية",
+  };
 
-const description: Record<Language, string> = {
-  fr: "Accédez à des eBooks inspirants pour progresser chaque jour et atteindre vos objectifs.",
-  en: "Access inspiring eBooks to grow every day and reach your goals.",
-  ar: "احصل على كتب إلكترونية ملهمة لتتطور كل يوم وتحقق أهدافك.",
-};
+  const description: Record<Language, string> = {
+    fr: "Accédez à des eBooks inspirants pour progresser chaque jour et atteindre vos objectifs.",
+    en: "Access inspiring eBooks to grow every day and reach your goals.",
+    ar: "احصل على كتب إلكترونية ملهمة لتتطور كل يوم وتحقق أهدافك.",
+  };
 
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await axios.get(`${AppURL}/api/Collectionebooks/allapproved`);
+        const approvedBooks = res.data.ebooks
+
+        setRealBooks(approvedBooks);
+      } catch (error) {
+        console.error('Erreur lors du chargement des ebooks', error);
+      }
+    };
+
+    fetchBooks();
+  }, [language]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -38,14 +87,26 @@ const description: Record<Language, string> = {
     setSelectedCategory(selectedCategory === category ? null : category);
   };
 
-  const filteredBooks = fakeBooks.filter((book) => {
-    const matchesSearch = book.titre.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredBooks = realBooks.filter((book) => {
+    const lowerSearch = searchTerm.toLowerCase();
+
+    // Vérifier si le texte correspond à titre, description, langue, catégorie, auteur.nom ou auteur.prenom
+    const matchesSearch =
+      book.titre.toLowerCase().includes(lowerSearch) ||
+      book.description.toLowerCase().includes(lowerSearch) ||
+      book.langue.toLowerCase().includes(lowerSearch) ||
+      book.categorie.toLowerCase().includes(lowerSearch) ||
+      book.auteur.nom.toLowerCase().includes(lowerSearch) ||
+      book.auteur.prenom.toLowerCase().includes(lowerSearch);
+
     const matchesCategory = selectedCategory ? book.categorie === selectedCategory : true;
+
     return matchesSearch && matchesCategory;
   });
 
+
   return (
-    <div className="pt-24 bg-blue-950 min-h-screen px-4 sm:px-6 w-full ">
+    <div className="pt-24 bg-blue-950 min-h-screen px-4 sm:px-6 w-full">
       <div className="w-full mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -64,10 +125,10 @@ const description: Record<Language, string> = {
               type="text"
               placeholder={
                 language === 'fr'
-                  ? 'Rechercher par titre...'
+                  ? 'Rechercher...'
                   : language === 'en'
-                    ? 'Search by title...'
-                    : 'ابحث حسب العنوان...'
+                    ? 'Search...'
+                    : 'ابحث...'
               }
               value={searchTerm}
               onChange={handleSearchChange}
@@ -101,13 +162,13 @@ const description: Record<Language, string> = {
 
 
 
-            <div className="overflow-x-auto" 
-            style={{ scrollbarWidth: 'none' }}
+            <div className="overflow-x-auto"
+              style={{ scrollbarWidth: 'none' }}
             >
               <div className="flex gap-2 w-max px-2 pb-3">
-                {categories.map((category) => (
+                {categories.map((category: string) => (
                   <button
-                    key={category}
+                    key={String(category)}
                     onClick={() => handleCategorySelect(category)}
                     className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${selectedCategory === category
                       ? 'bg-orange-400 text-white shadow-md'
@@ -126,10 +187,10 @@ const description: Record<Language, string> = {
 
         {/* Books Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full ">
-          {filteredBooks.map((book) => (
+          {filteredBooks.map((book: any) => (
             <div
-              key={book.id}
-              className=" mb-8  bg-blue-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-transform transform hover:-translate-y-1 overflow-hidden cursor-pointer flex flex-col"
+              key={book.ebookId}
+              className=" mb-8 bg-blue-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-transform transform hover:-translate-y-1 overflow-hidden cursor-pointer flex flex-col"
             >
               <div
                 className="relative aspect-[3/4] group"
@@ -137,16 +198,17 @@ const description: Record<Language, string> = {
                 style={{ height: '180px' }} // ✅ hauteur réduite
               >
                 <img
-                  src={book.image}
+                  src={`${AppURL}${book.folderPath}cover.png`}
                   alt={book.titre}
                   className="absolute h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
+
               </div>
               <div className="p-2 flex-1 flex flex-col justify-between"> {/* ✅ padding réduit */}
                 <div>
                   <h3 className="font-semibold text-xs text-blue-950 mb-1 line-clamp-2">{book.titre}</h3> {/* ✅ taille titre réduite */}
                   <p className="text-[10px] text-gray-600 mb-1">
-                    {language === 'fr' ? 'Par' : language === 'en' ? 'By' : 'بواسطة'} {book.auteur}
+                    {language === 'fr' ? 'Par' : language === 'en' ? 'By' : 'بواسطة'} {book.auteur.prenom} {book.auteur.nom}
                   </p>
                   <span className="inline-block text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded mt-1">
                     {book.categorie}
@@ -154,7 +216,20 @@ const description: Record<Language, string> = {
                 </div>
 
                 <div className="mt-2 flex justify-between items-center">
-                  <p className="font-bold text-green-800 text-xs">{book.prix.toFixed(2)} $</p>
+                  {book.promotion ? (
+                    <div className="flex flex-col">
+                      <span className="line-through text-red-700 text-[10px]">
+                        {book.prix.toFixed(2)} $
+                      </span>
+                      <span className="text-green-800 font-bold text-xs">
+                        {parseFloat(book.newPrix || '0').toFixed(2)} $
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="font-bold text-green-800 text-xs">
+                      {book.prix.toFixed(2)} $
+                    </p>
+                  )}
                   <button
                     onClick={() => setSelectedBook(book)} // ouvre le modal de détails
                     className="text-[10px] bg-blue-950 text-white px-2 py-1 rounded-md hover:bg-orange-400 transition-colors duration-300"

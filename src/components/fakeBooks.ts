@@ -9,9 +9,10 @@ export interface Book {
   prix: number;
   auteur: string;
   images: string[]; // ✅ ajout des images du photobook
+  
 }
 
-const categories = ["Informatique", "Business", "Psychologie", "Motivation", "Finance", "Marketing", "Management"];
+const categories = ["Informatique", "Business", "Psychologie", "Motivation", "Finance", "Marketing", "Développement personnel", "Santé", "Voyage", "Cuisine", "Science", "Fiction", "Histoire", "Arts", "Biographie"];
 
 export const fakeBooks: Book[] = [
   {

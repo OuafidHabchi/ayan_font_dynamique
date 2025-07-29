@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaChevronDown, FaArrowRight, FaStar, FaRegStar } from 'react-icons/fa';
+import { FaChevronDown, FaArrowRight } from 'react-icons/fa';
+import axios from 'axios';
+import AppURL from '../../components/AppUrl';
+
+
 
 type Language = 'fr' | 'en' | 'ar';
 
@@ -10,16 +14,11 @@ interface HomePageProps {
 
 const HomePage: React.FC<HomePageProps> = ({ language }) => {
   const navigate = useNavigate();
-
-  const scrollToFeatures = () => {
-    const section = document.getElementById('features-section');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const [topProducts, setTopProducts] = useState<any[]>([]);
 
   const images = ['/ayan5.png', '/ayan6.png', '/ayan4.png', '/ayan7.png'];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
 
   useEffect(() => {
     // Précharger toutes les images
@@ -34,6 +33,31 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
 
     return () => clearInterval(interval);
   }, [images.length]);
+
+
+  useEffect(() => {
+    axios.get(`${AppURL}/api/ventes/topProducts`)
+      .then(res => {
+        if (Array.isArray(res.data.produits)) {
+          setTopProducts(res.data.produits);
+        } else {
+          console.error("Format inattendu :", res.data);
+          setTopProducts([]); // fallback sécurité
+        }
+      })
+      .catch(err => {
+        console.error('Erreur chargement produits populaires', err);
+        setTopProducts([]); // fallback sécurité
+      });
+  }, []);
+
+
+  const scrollToFeatures = () => {
+    const section = document.getElementById('features-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
 
   const titles: Record<Language, string> = {
@@ -56,9 +80,8 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
 
   return (
     <div className="font-sans bg-white text-gray-800 antialiased ">
-
       {/* Hero Section */}
-      <section className="relative px-6 text-white py-32 md:py-48 lg:py-64 overflow-hidden">
+      <section className="relative px-6 text-white py-25 md:py-36 lg:py-48 overflow-hidden">
         {/* Images avec transition d'opacité */}
         {images.map((img, index) => (
           <div
@@ -75,33 +98,43 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
           />
         ))}
 
+        {/* Overlay sombre pour améliorer la lisibilité */}
+        <div className="absolute inset-0 bg-black opacity-40 z-1"></div>
+
         {/* Effet de lumière subtil */}
         <div
-          className="absolute inset-0 opacity-80 z-1"
+          className="absolute inset-0 opacity-60 z-1"
           style={{
-            backgroundImage: "radial-gradient(circle at 10% 20%, rgba(255,255,255,0.3) 0%, transparent 30%)",
+            backgroundImage: "radial-gradient(circle at 10% 20%, rgba(255,255,255,0.2) 0%, transparent 30%)",
           }}
         ></div>
 
-        <div className="relative max-w-6xl mx-auto text-center z-10">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight drop-shadow-lg text-orange-400">
+        <div className="relative max-w-6xl mx-auto text-center z-10 ">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight drop-shadow-xl text-orange-400">
             {titles[language]}
           </h1>
 
-          <p className="text-xl md:text-2xl mb-8 font-bold leading-relaxed max-w-3xl mx-auto drop-shadow-lg text-white">
+          <p className="text-xl md:text-2xl mb-8 font-bold leading-relaxed max-w-3xl mx-auto text-white drop-shadow-xl">
             {subtitles[language]}
           </p>
 
-          <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed text-white drop-shadow-md">
+          <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed text-gray-100 drop-shadow-lg">
             {description[language]}
           </p>
         </div>
 
         {/* Down Arrow */}
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10">
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 flex items-center gap-6">
+          <button
+            onClick={() => navigate('/signin')}
+            className="bg-orange-400 hover:bg-orange-300 text-blue-950 font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 min-w-[220px] text-center transform hover:scale-105"
+          >
+            {language === 'fr' ? 'Commencer' : language === 'en' ? 'Get Started' : 'ابدأ الآن'}
+          </button>
+
           <button
             onClick={scrollToFeatures}
-            className="animate-bounce text-white text-2xl focus:outline-none"
+            className="animate-bounce text-orange-300 hover:text-white text-2xl focus:outline-none transition-colors duration-300"
             aria-label="Scroll to features"
           >
             <FaChevronDown />
@@ -110,67 +143,106 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
       </section>
 
 
-      {/* Features Section */}
-      <section id="features-section" className="py-20 px-6 " style={{ backgroundColor: '#081229' }}>
+      {/* Features Section - Modern Design */}
+      <section id="features-section" className="py-24 px-6" style={{ backgroundColor: '#081229' }}>
         <div className="max-w-7xl mx-auto">
+          {/* Titre */}
           <div className="text-center mb-16">
-            <span className="text-orange-400 font-semibold mb-2 block">
+            <span className="text-orange-400 font-semibold mb-2 block tracking-widest uppercase text-sm">
               {language === 'fr' ? 'FONCTIONNALITÉS' : language === 'en' ? 'FEATURES' : 'ميزات'}
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-              {language === 'fr' ? 'Pourquoi choisir Ayan Bridge ?' :
-                language === 'en' ? 'Why Choose Ayan Bridge?' :
-                  'لماذا أيــان بريــدج؟'}
+            <h2 className="text-4xl font-bold text-white mb-4">
+              {language === 'fr'
+                ? 'Pourquoi choisir Ayan Bridge ?'
+                : language === 'en'
+                  ? 'Why Choose Ayan Bridge?'
+                  : 'لماذا أيــان بريــدج؟'}
             </h2>
-            <p className="text-lg text-white max-w-2xl mx-auto">
-              {language === 'fr' ? 'Découvrez une expérience unique conçue pour votre succès' :
-                language === 'en' ? 'Discover a unique experience designed for your success' :
-                  'اكتشف تجربة فريدة مصممة لنجاحك'}
+            <div className="w-24 h-1 bg-orange-400 mx-auto mb-6"></div>
+            <p className="text-lg text-blue-200 max-w-2xl mx-auto">
+              {language === 'fr'
+                ? 'Découvrez une expérience unique conçue pour votre succès'
+                : language === 'en'
+                  ? 'Discover a unique experience designed for your success'
+                  : 'اكتشف تجربة فريدة مصممة لنجاحك'}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Cartes de fonctionnalités modernes */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {([
               ['📚',
-                language === 'fr' ? 'Ressources riches' : language === 'en' ? 'Rich Resources' : 'موارد غنية',
-                language === 'fr' ? 'Accédez à des milliers de ressources éducatives et créatives.' : language === 'en' ? 'Access thousands of educational and creative resources.' : 'الوصول إلى آلاف الموارد التعليمية والإبداعية.',
-                '/ebook'
-              ],
-              ['🤖',
-                language === 'fr' ? 'IA & Studio' : language === 'en' ? 'AI & Studio' : 'الذكاء الاصطناعي والاستوديو',
-                language === 'fr' ? 'Créez, publiez et innovez rapidement grâce à nos outils IA.' : language === 'en' ? 'Create, publish, and innovate rapidly with our AI tools.' : 'أنشئ وانشر وابتكر بسرعة باستخدام أدوات الذكاء الاصطناعي.',
-                '/AIStudio'
-              ],
+                language === 'fr' ? 'Bibliothèque numérique' : language === 'en' ? 'Digital Library' : 'المكتبة الرقمية',
+                language === 'fr'
+                  ? 'Explorez une vaste collection de ressources éducatives et créatives.'
+                  : language === 'en'
+                    ? 'Explore a vast collection of educational and creative resources.'
+                    : 'استكشف مجموعة واسعة من الموارد التعليمية والإبداعية.',
+                '/ebook',
+                'bg-gradient-to-br from-blue-400 to-blue-600'],
               ['🎓',
-                language === 'fr' ? 'Formations certifiées' : language === 'en' ? 'Certified Courses' : 'دورات معتمدة',
-                language === 'fr' ? 'Développez vos compétences avec des programmes validés.' : language === 'en' ? 'Grow your skills with accredited programs.' : 'طوّر مهاراتك مع برامج معتمدة.',
-                '/LearnHub'
-              ],
+                language === 'fr' ? 'Parcours d\'apprentissage' : language === 'en' ? 'Learning Paths' : 'مسارات التعلم',
+                language === 'fr'
+                  ? 'Développez vos compétences à travers des formations certifiées.'
+                  : language === 'en'
+                    ? 'Grow your skills with structured, certified courses.'
+                    : 'طوّر مهاراتك من خلال دورات منظمة ومعتمدة.',
+                '/LearnHub',
+                'bg-gradient-to-br from-purple-400 to-purple-600'],
+              ['🤖',
+                language === 'fr' ? 'Studio IA' : language === 'en' ? 'AI Studio' : 'استوديو الذكاء الاصطناعي',
+                language === 'fr'
+                  ? 'Créez, publiez et innovez grâce à nos outils intelligents.'
+                  : language === 'en'
+                    ? 'Create, publish, and innovate with our smart tools.'
+                    : 'أنشئ، وانشر، وابتكر باستخدام أدواتنا الذكية.',
+                '/AIStudio',
+                'bg-gradient-to-br from-orange-400 to-orange-600'],
               ['💼',
-                language === 'fr' ? 'Investissements rentables' : language === 'en' ? 'Profitable Investments' : 'استثمارات مربحة',
-                language === 'fr' ? 'Soutenez et bénéficiez des meilleurs projets du marché.' : language === 'en' ? 'Support and benefit from top market projects.' : 'ادعم واستفد من أفضل المشاريع في السوق.',
-                '/Invest'
-              ],
-            ] as [string, string, string, string][]).map(([emoji, title, desc, link], i) => (
+                language === 'fr' ? 'Opportunités d\'investissement' : language === 'en' ? 'Investment Opportunities' : 'فرص استثمارية',
+                language === 'fr'
+                  ? 'Investissez dans des projets innovants et rentables.'
+                  : language === 'en'
+                    ? 'Invest in innovative and profitable projects.'
+                    : 'استثمر في مشاريع مبتكرة ومربحة.',
+                '/Invest',
+                'bg-gradient-to-br from-green-400 to-green-600'],
+            ] as [string, string, string, string, string][]).map(([emoji, title, desc, link, gradient], i) => (
               <div
                 key={i}
                 onClick={() => navigate(link)}
-                className="group relative bg-white rounded-xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100 overflow-hidden"
+                className="relative overflow-hidden group cursor-pointer rounded-xl shadow-2xl transition-all duration-500 hover:-translate-y-3"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                {/* Gradient Background */}
+                <div className={`absolute inset-0 ${gradient} opacity-20 group-hover:opacity-30 transition-opacity duration-500`}></div>
 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-center w-14 h-14 mx-auto mb-6 rounded-xl bg-blue-950 text-2xl text-white group-hover:bg-blue-800 transition-colors duration-300 shadow-md">
+                {/* Card Content */}
+                <div className="relative bg-gradient-to-b from-blue-950 via-blue-900 to-blue-950 bg-opacity-50 backdrop-blur-sm p-8 h-full border border-gray-700 rounded-xl hover:border-orange-400 transition-all duration-300">
+                  {/* Animated Border Effect */}
+                  <div className="absolute inset-0 rounded-xl overflow-hidden">
+                    <div className={`absolute inset-0 ${gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-500`}></div>
+                  </div>
+
+                  {/* Icon Container with Gradient */}
+                  <div className={`relative z-10 flex items-center justify-center w-16 h-16 mx-auto mb-6 rounded-xl ${gradient} text-white text-3xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                     {emoji}
                   </div>
 
-                  <h3 className="text-xl font-bold mb-3 text-gray-900 text-center">{title}</h3>
-                  <p className="text-gray-600 text-center mb-6">{desc}</p>
+                  {/* Title & Description */}
+                  <h3 className="text-xl font-bold text-center text-white mb-4 group-hover:text-orange-300 transition-colors duration-300">
+                    {title}
+                  </h3>
+                  <p className="text-gray-300 text-center mb-6 group-hover:text-white transition-colors duration-300">
+                    {desc}
+                  </p>
 
+                  {/* Explore Button with Hover Effect */}
                   <div className="flex justify-center">
-                    <button className="flex items-center text-blue-950 font-medium group-hover:text-blue-800 transition-colors">
-                      {language === 'fr' ? 'Explorer' : language === 'en' ? 'Explore' : 'استكشف'}
-                      <FaArrowRight className="ml-2 transition-transform group-hover:translate-x-1" />
+                    <button className="flex items-center justify-center px-6 py-2 rounded-full bg-transparent border border-orange-400 text-orange-400 font-medium group-hover:bg-orange-400 group-hover:text-white transition-all duration-300">
+                      <span className="mr-2">
+                        {language === 'fr' ? 'Explorer' : language === 'en' ? 'Explore' : 'استكشف'}
+                      </span>
+                      <FaArrowRight className="transition-transform group-hover:translate-x-1" />
                     </button>
                   </div>
                 </div>
@@ -179,6 +251,7 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
           </div>
         </div>
       </section>
+
 
       {/* Products Section */}
       <section className="py-20 px-6 bg-blue-50">
@@ -200,55 +273,42 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            {topProducts.map((product) => (
               <div
-                key={i}
+                key={product.id}
                 className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
               >
                 <div className="relative overflow-hidden h-48">
                   <img
-                    src={`https://picsum.photos/600/400?random=${i}`}
-                    alt={`Produit ${i}`}
+                    src={
+                      product.coverImage?.startsWith('/')
+                        ? `${AppURL}${product.coverImage}${product.type === 'ebook' ? 'cover.png' : ''}`
+                        : product.coverImage || '/default.jpg'
+                    }
+                    alt={product.titre}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  {i % 3 === 0 && (
-                    <span className="absolute top-3 right-3 bg-blue-950 text-white text-xs px-2 py-1 rounded-full">
-                      {language === 'fr' ? 'Nouveau' : language === 'en' ? 'New' : 'جديد'}
-                    </span>
-                  )}
+
                 </div>
 
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-gray-900">
-                      {language === 'fr' ? `Formation ${i}` :
-                        language === 'en' ? `Course ${i}` :
-                          `دورة ${i}`}
-                    </h3>
-                    <div className="flex items-center text-yellow-400">
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaRegStar />
-                    </div>
+                    <h3 className="font-bold text-gray-900 line-clamp-2">{product.titre}</h3>
+                    <p className="text-sm text-orange-500">
+                      {product.ventes || 0} {language === 'fr' ? 'ventes' : language === 'en' ? 'sales' : 'عملية بيع'}
+                    </p>
+
                   </div>
                   <p className="text-sm text-gray-600 mb-3">
-                    {language === 'fr' ? 'Par Ayan Creator' :
-                      language === 'en' ? 'By Ayan Creator' :
-                        'بواسطة أيان كريتور'}
+                    {language === 'fr' ? 'Par' : language === 'en' ? 'By' : 'بواسطة'} {product.auteur || 'Ayan Creator'}
                   </p>
                   <div className="flex justify-between items-center">
-                    <p className="font-bold text-gray-900">$19.99</p>
-                    <button
-                      onClick={() => navigate(`/product-${i}`)}
-                      className="text-xs bg-blue-950 hover:bg-blue-800 text-white py-2 px-3 rounded-full transition-colors"
-                    >
-                      {language === 'fr' ? 'Voir +' :
-                        language === 'en' ? 'View +' :
-                          'عرض المزيد'}
-                    </button>
+                    <p className="font-bold text-green-800">
+                      {product.prix ? `$${product.prix.toFixed(2)}` : 'Gratuit'}
+                    </p>
+
                   </div>
                 </div>
               </div>
@@ -257,7 +317,7 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
 
           <div className="text-center mt-12">
             <button
-              onClick={() => navigate('/products')}
+              onClick={() => navigate('/ebook')}
               className="inline-flex items-center px-6 py-3 border border-blue-950 text-blue-950 rounded-full font-medium hover:bg-blue-950 hover:text-white transition-colors"
             >
               {language === 'fr' ? 'Voir tous les produits' :
@@ -269,58 +329,8 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 px-6 bg-blue-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="text-blue-950 font-semibold mb-2 block">
-              {language === 'fr' ? 'TÉMOIGNAGES' : language === 'en' ? 'TESTIMONIALS' : 'شهادات'}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
-              {language === 'fr' ? 'Ils nous font confiance' :
-                language === 'en' ? 'They trust us' :
-                  'يثقون بنا'}
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              {language === 'fr' ? 'Ce que nos utilisateurs disent de nous' :
-                language === 'en' ? 'What our users say about us' :
-                  'ما يقوله مستخدمونا عنا'}
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {([
-              ['https://randomuser.me/api/portraits/women/44.jpg', 'Sarah', 'Étudiante', language === 'fr' ? 'Grâce à Ayan Learn Hub, j\'ai obtenu ma première certification !' : language === 'en' ? 'Thanks to Ayan Learn Hub, I got my first certification!' : 'بفضل أيان بريديج، حصلت على أول شهادة لي!', 5],
-              ['https://randomuser.me/api/portraits/men/32.jpg', 'Karim', 'Créateur', language === 'fr' ? 'Le studio IA m\'a permis de publier mon premier ebook en 2 jours.' : language === 'en' ? 'The AI studio allowed me to publish my first ebook in 2 days.' : 'ساعدني استوديو الذكاء الاصطناعي على نشر أول كتاب إلكتروني لي في يومين.', 5],
-            ] as [string, string, string, string, number][]).map(([img, name, role, quote, stars], i) => (
-              <div
-                key={i}
-                className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100"
-              >
-                <div className="flex items-start gap-6">
-                  <img
-                    src={img}
-                    alt={name}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md"
-                  />
-                  <div className="flex-1">
-                    <div className="flex mb-4">
-                      {[...Array(stars)].map((_, i) => (
-                        <FaStar key={i} className="w-5 h-5 text-yellow-400" />
-                      ))}
-                    </div>
-                    <p className="italic text-gray-700 text-lg mb-6">"{quote}"</p>
-                    <div>
-                      <p className="font-bold text-gray-900">{name}</p>
-                      <p className="text-gray-600">{role}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* CTA Section */}
       <section className="py-20 px-6  text-white" style={{ backgroundColor: '#081229' }}>
@@ -346,7 +356,7 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
               <FaArrowRight />
             </button>
             <button
-              onClick={() => navigate('/contact')}
+              onClick={() => navigate('/aboutus')}
               className="flex items-center justify-center bg-transparent border-2 border-white text-white font-semibold py-4 px-8 rounded-full hover:bg-white hover:text-blue-950 transition-all duration-300"
             >
               {language === 'fr' ? 'Nous contacter' :
@@ -394,10 +404,8 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
               {language === 'fr' ? 'Liens rapides' : language === 'en' ? 'Quick Links' : 'روابط سريعة'}
             </h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">{language === 'fr' ? 'Accueil' : language === 'en' ? 'Home' : 'الرئيسية'}</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">{language === 'fr' ? 'À propos' : language === 'en' ? 'About' : 'من نحن'}</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">{language === 'fr' ? 'Services' : language === 'en' ? 'Services' : 'خدماتنا'}</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">{language === 'fr' ? 'Contact' : language === 'en' ? 'Contact' : 'اتصل بنا'}</a></li>
+              <li><a href="/" className="text-gray-400 hover:text-white transition-colors">{language === 'fr' ? 'Accueil' : language === 'en' ? 'Home' : 'الرئيسية'}</a></li>
+              <li><a href="/aboutus" className="text-gray-400 hover:text-white transition-colors">{language === 'fr' ? 'À propos' : language === 'en' ? 'About' : 'من نحن'}</a></li>
             </ul>
           </div>
 
@@ -406,10 +414,10 @@ const HomePage: React.FC<HomePageProps> = ({ language }) => {
               {language === 'fr' ? 'Produits' : language === 'en' ? 'Products' : 'منتجاتنا'}
             </h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Learn Hub</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">AI Studio</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Marketplace</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Invest</a></li>
+              <li><a href="/LearnHub" className="text-gray-400 hover:text-white transition-colors">Learn Hub</a></li>
+              <li><a href="AIStudio" className="text-gray-400 hover:text-white transition-colors">AI Studio</a></li>
+              <li><a href="/ebook" className="text-gray-400 hover:text-white transition-colors">Marketplace</a></li>
+              <li><a href="Invest" className="text-gray-400 hover:text-white transition-colors">Invest</a></li>
             </ul>
           </div>
 
